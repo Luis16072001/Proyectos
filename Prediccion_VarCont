@@ -1,5 +1,5 @@
 #_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
-#-----------------------1. PredicciÛn en el caso continuo-----------------------
+#-----------------------1. Predicci√≥n en el caso continuo-----------------------
 #_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
 #Importamos la base de datos fat del paquete faraway
 rm(list = ls(all.names = TRUE))
@@ -9,34 +9,34 @@ library(faraway)
 #-------------------------Preprocesamiento de los datos-------------------------
 #_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
 
-#Consideramos ˙nicamente las variables de interes
+#Consideramos √∫nicamente las variables de interes
 datos = fat[,colnames(fat)[c(1,4:7,9:18)]]
 #Veamos las descripciones de cada variable:
-#brozek Porcentaje de grasa corporal utilizando la ecuaciÛn de Brozek, 457/Densidad - 414,2
-#age Edad (aÒos)
+#brozek Porcentaje de grasa corporal utilizando la ecuaci√≥n de Brozek, 457/Densidad - 414,2
+#age Edad (a√±os)
 #weight Peso (libras)
 #height Altura (pulgadas)
-#adipos Õndice de adiposidad = Peso/Altura$^2$ (kg/$m^2$)
+#adipos √çndice de adiposidad = Peso/Altura$^2$ (kg/$m^2$)
 #neck Circunferencia del cuello (cm)
 #chest Circunferencia del pecho (cm)
-#abdom Circunferencia del abdomen (cm) en el ombligo y al nivel de la cresta ilÌaca
+#abdom Circunferencia del abdomen (cm) en el ombligo y al nivel de la cresta il√≠aca
 #hip Circunferencia de la cadera (cm)
 #thigh Circunferencia del muslo (cm)
 #knee Circunferencia de la rodilla (cm)
 #ankle Circunferencia del tobillo (cm)
-#biceps Circunferencia extendida del bÌceps (cm)
+#biceps Circunferencia extendida del b√≠ceps (cm)
 #forearm Circunferencia del antebrazo (cm)
-#wrist Circunferencia de la muÒeca (cm) distal a la apÛfisis estiloides
+#wrist Circunferencia de la mu√±eca (cm) distal a la ap√≥fisis estiloides
 #Veamos la structura de nuestros datos
 str(datos)
-#Por la descripciÛn de cada una de nuestras variables, sabemos que no es necesario
+#Por la descripci√≥n de cada una de nuestras variables, sabemos que no es necesario
 #un preprocesamiento de nuestras variables ya que todas pueden ser consideradas como
 #variables continuas.
 #Ahora veamos un resumen de nuestros datos
 summary(datos)
-#De este resumen podemos conocer un poco acerca de las personas que formarÛn este estudio
-#* El estudio contiende datos de hombres desde los 22 aÒos hasta los 81 aÒos,
-#  la edad promedio es de 45 aÒos.
+#De este resumen podemos conocer un poco acerca de las personas que formar√≥n este estudio
+#* El estudio contiende datos de hombres desde los 22 a√±os hasta los 81 a√±os,
+#  la edad promedio es de 45 a√±os.
 #* El peso promedio es de 178.9 lbs, sin embargo, se tiene un registro de un peso de
 #  363.1 lbs, por lo que mas adelante sera descartado.
 #* La altura promedio es de 70.15 pulgadas, sin embargo, se tiene un resgistro de una
@@ -49,7 +49,7 @@ datos = datos[datos$weight != 363.1,]
 datos = datos[datos$height != 29.50,]
 
 #Creamos un DataFrame para ir alamcenando los resultados
-models = data.frame(SelecciÛn = character(), Datos = character(),DistribuciÛn=character(), 
+models = data.frame(Selecci√≥n = character(), Datos = character(),Distribuci√≥n=character(), 
                     Liga = character(), MSE_5CV = numeric())
 ligas = c("identity", "inverse", "log")
 #1:= Efectos Principales
@@ -61,8 +61,8 @@ sel = c("NA", "Stepwise", "Lasso")
 
 #_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
 #i) Considere un modelo lineal generalizado para datos continuos con liga identidad
-#y distribuciÛn Gaussiana. Explore modelos con los efectos principales de las variables
-#asÌ como su interacciÛn (y/o los cuadrados de las variables).
+#y distribuci√≥n Gaussiana. Explore modelos con los efectos principales de las variables
+#as√≠ como su interacci√≥n (y/o los cuadrados de las variables).
 #_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 #Guardamos los esquemas
@@ -73,8 +73,8 @@ models[1:3,4] = ligas[1]
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#Haremos nuestra particiÛn de los datos, donde aproximadamente el 80% de la data ser· 
-#para el train y el 20% restante ser· para el test. Para ello hacemos lo siguiente:
+#Haremos nuestra partici√≥n de los datos, donde aproximadamente el 80% de la data ser√° 
+#para el train y el 20% restante ser√° para el test. Para ello hacemos lo siguiente:
 set.seed (1)
 n = dim(datos)[1]
 train = sample(1:n, n*.8)
@@ -83,17 +83,17 @@ test = (-train)
 #Haremos 5-CV por lo que necesitamos un vector con valores del 1 a 5
 K=5
 labK=rep(1:K, length.out = n)
-#Y realizamos una permitaciÛn aleatoria de los pliegues
+#Y realizamos una permitaci√≥n aleatoria de los pliegues
 set.seed(123)
 Pliegues <- sample(labK)
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con liga identidad y distribuciÛn Gaussiana, incluyendo solamente efectos principales.
+#con liga identidad y distribuci√≥n Gaussiana, incluyendo solamente efectos principales.
 #Ajustemos este modelo
 mod1 = lm(brozek  ~., datos)
 summary(mod1)
-#Hacemos la funciÛn para calcular el MSE en cada interacciÛn
+#Hacemos la funci√≥n para calcular el MSE en cada interacci√≥n
 mod1_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
   test = (-train)
@@ -105,18 +105,18 @@ mod1_5CV = function(x, Plie, Dat){
 #Aplicamos 5-CV
 MSE.5.mod1 = sapply(1:K,mod1_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando 5-CV es
+#As√≠ el poder predictivo de este modelo usando 5-CV es
 (models[1,5]=mean(MSE.5.mod1))
 #17.6787
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con liga identidad y distribuciÛn Gaussiana, incluyendo efectos principales e
+#con liga identidad y distribuci√≥n Gaussiana, incluyendo efectos principales e
 #interacciones.
 #Ajustemos este modelo
 mod2 = lm(brozek  ~.^2, datos)
 summary(mod2)
 
-#Hacemos la funciÛn para calcular el MSE en cada interacciÛn
+#Hacemos la funci√≥n para calcular el MSE en cada interacci√≥n
 mod2_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
   test = (-train)
@@ -128,23 +128,23 @@ mod2_5CV = function(x, Plie, Dat){
 #Aplicamos 5-CV
 MSE.5.mod2= sapply(1:K,mod2_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando 5-CV es
+#As√≠ el poder predictivo de este modelo usando 5-CV es
 (models[2,5]=mean(MSE.5.mod2))
 #84.66113
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con liga identidad y distribuciÛn Gaussiana, incluyendo efectos principales y su
-#versiÛn al cuadrado.
+#con liga identidad y distribuci√≥n Gaussiana, incluyendo efectos principales y su
+#versi√≥n al cuadrado.
 #Primero vamos a crear la formula del modelo completo
 xnames = colnames(datos)[2:15]
 formexp = as.formula(paste('brozek ~.',"+", paste(paste('I(',xnames,'^2)',collapse = ' + ')  ) )) 
 #Es evidente que esta formula no depende de las observaciones, por lo que a pesar de
-#formar parte del procesamiento de datos, no afecta la divisiÛn previa que se hizo 
+#formar parte del procesamiento de datos, no afecta la divisi√≥n previa que se hizo 
 #para los conjuntos train-test.
 #Ajustamos el modelo
 mod3 = lm(formexp, datos)
 summary(mod3)
-#Hacemos la funciÛn para calcular el MSE en cada interacciÛn
+#Hacemos la funci√≥n para calcular el MSE en cada interacci√≥n
 mod3_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
   test = (-train)
@@ -156,12 +156,12 @@ mod3_5CV = function(x, Plie, Dat){
 #Aplicamos 5-CV
 MSE.5.mod3= sapply(1:K,mod3_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando 5-CV es
+#As√≠ el poder predictivo de este modelo usando 5-CV es
 (models[3,5]=mean(MSE.5.mod3))
 #18.9909
 
 #_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
-#ii) Considere los casos explorados en i), pero realizando selecciÛn de variables
+#ii) Considere los casos explorados en i), pero realizando selecci√≥n de variables
 # con el criterio AIC.
 #_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -173,8 +173,8 @@ models[4:6,4] = ligas[1]
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con liga identidad y distribuciÛn Gaussiana, realizando una selecciÛn de variables
-#usando mÈtodo stepwise (backward) con el criterio AIC, sobre el modelo que solo 
+#con liga identidad y distribuci√≥n Gaussiana, realizando una selecci√≥n de variables
+#usando m√©todo stepwise (backward) con el criterio AIC, sobre el modelo que solo 
 #considera efectos principales.
 library("MASS")
 #Ajustamos el modelo usando stepwise backward
@@ -182,7 +182,7 @@ mod4 = stepAIC(mod1, trace = FALSE)
 mod4$formula
 summary(mod4)
 
-#Hacemos la funciÛn para calcular el MSE en cada interacciÛn
+#Hacemos la funci√≥n para calcular el MSE en cada interacci√≥n
 mod4_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
   test = (-train)
@@ -196,18 +196,18 @@ mod4_5CV = function(x, Plie, Dat){
 #Aplicamos 5-CV
 MSE.5.mod4= sapply(1:K,mod4_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando 5-CV es
+#As√≠ el poder predictivo de este modelo usando 5-CV es
 (models[4,5]=mean(MSE.5.mod4))
 #17.79291
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con liga identidad y distribuciÛn Gaussiana, realizando una selecciÛn de variables
-#usando mÈtodo stepwise (backward) con el criterio AIC, sobre el modelo que solo 
+#con liga identidad y distribuci√≥n Gaussiana, realizando una selecci√≥n de variables
+#usando m√©todo stepwise (backward) con el criterio AIC, sobre el modelo que solo 
 #considera efectos principales y sus interacciones.
 #Ajustamos el modelo usando stepwise backward
 mod5 = stepAIC(mod2, trace = FALSE)
 summary(mod5)
-#Hacemos la funciÛn para calcular el MSE en cada interacciÛn
+#Hacemos la funci√≥n para calcular el MSE en cada interacci√≥n
 mod5_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
   test = (-train)
@@ -220,18 +220,18 @@ mod5_5CV = function(x, Plie, Dat){
 }
 MSE.5.mod5= sapply(1:K,mod5_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando MSE y 5-CV es
+#As√≠ el poder predictivo de este modelo usando MSE y 5-CV es
 (models[5,5]=mean(MSE.5.mod5))
 #45.98253
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con liga identidad y distribuciÛn Gaussiana, realizando una selecciÛn de variables
-#usando mÈtodo stepwise (backward) con el criterio AIC, sobre el modelo que 
-#considera efectos principales y la versiÛn al cuadrado de los mismos
+#con liga identidad y distribuci√≥n Gaussiana, realizando una selecci√≥n de variables
+#usando m√©todo stepwise (backward) con el criterio AIC, sobre el modelo que 
+#considera efectos principales y la versi√≥n al cuadrado de los mismos
 #Ajustamos el modelo usando stepwise backward
 mod6 = stepAIC(mod3, trace = FALSE)
 sumary(mod6)
-#Hacemos la funciÛn para calcular el MSE en cada interacciÛn
+#Hacemos la funci√≥n para calcular el MSE en cada interacci√≥n
 mod6_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
   test = (-train)
@@ -244,12 +244,12 @@ mod6_5CV = function(x, Plie, Dat){
 }
 MSE.5.mod6= sapply(1:K,mod6_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando 5-CV es
+#As√≠ el poder predictivo de este modelo usando 5-CV es
 (models[6,5]=mean(MSE.5.mod6))
 #18.18705
 
 #_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
-#iii) Considere los casos explorados en i), pero realizando selecciÛn de variables
+#iii) Considere los casos explorados en i), pero realizando selecci√≥n de variables
 # con el metodo lasso.
 #_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -260,8 +260,8 @@ models[7:9,3] = dist[1]
 models[7:9,4] = ligas[1]
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con liga identidad y distribuciÛn Gaussiana, realizando una selecciÛn de variables
-#usando mÈtodo lasso, sobre el modelo que solo considera efectos principales.
+#con liga identidad y distribuci√≥n Gaussiana, realizando una selecci√≥n de variables
+#usando m√©todo lasso, sobre el modelo que solo considera efectos principales.
 library(glmnet)
 #Agrupamos nuestros datos para usar glmnet
 Xmod7 = model.matrix(brozek ~ ., data = datos)[,-1]
@@ -277,13 +277,13 @@ mod7.lasso.tun$lambda.min
 #Vemos cuales son las variables y los coeficientes resultantes al usar esta variable
 coef(mod7.lasso.tun, s = "lambda.min")
 #Recordemos que estos estimadores no son EMV
-#AsÌ la REGLA FINAL es aquella en donde se usa el lambda seleccionado, en este caso
-#el lambda mas pequeÒo.
-#Notemos que la agrupaciÛn de nuestros datos para usar glmnet y la definicion (tuneo)
+#As√≠ la REGLA FINAL es aquella en donde se usa el lambda seleccionado, en este caso
+#el lambda mas peque√±o.
+#Notemos que la agrupaci√≥n de nuestros datos para usar glmnet y la definicion (tuneo)
 #de lambda deben ser tomados en cuenta en el entrenamiento.
-#Ahora si hagamos la mediciÛn del poder predictivo
+#Ahora si hagamos la medici√≥n del poder predictivo
 
-#Hacemos la funciÛn para calcular el MSE en cada interacciÛn
+#Hacemos la funci√≥n para calcular el MSE en cada interacci√≥n
 mod7RHM=function(x, Plie, Dat){
   train <- which(Plie != x)
   test = (-train)
@@ -298,13 +298,13 @@ mod7RHM=function(x, Plie, Dat){
 
 MSE.5.mod7= sapply(1:K,mod7RHM, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando 5-CV es
+#As√≠ el poder predictivo de este modelo usando 5-CV es
 (models[7,5]=mean(MSE.5.mod7))
 # 18.03985
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con liga identidad y distribuciÛn Gaussiana, realizando una selecciÛn de variables
-#usando mÈtodo lasso, sobre el modelo que considera efectos principales con interacciones
+#con liga identidad y distribuci√≥n Gaussiana, realizando una selecci√≥n de variables
+#usando m√©todo lasso, sobre el modelo que considera efectos principales con interacciones
 #Agrupamos nuestros datos para usar glmnet
 Xmod8 = model.matrix(brozek ~ .^2, data = datos)[,-1]
 Ymod8 = datos[,"brozek"]
@@ -319,12 +319,12 @@ mod8.lasso.tun$lambda.min
 #Vemos cuales son las variables y los coeficientes resultantes al usar esta variable
 coef(mod8.lasso.tun, s = "lambda.min")
 #Recordemos que estos estimadores no son EMV
-#AsÌ la REGLA FINAL es aquella en donde se usa el lambda seleccionado, en este caso
-#el lambda mas pequeÒo.
-#Notemos que la agrupaciÛn de nuestros datos para usar glmnet y la definicion (tuneo)
+#As√≠ la REGLA FINAL es aquella en donde se usa el lambda seleccionado, en este caso
+#el lambda mas peque√±o.
+#Notemos que la agrupaci√≥n de nuestros datos para usar glmnet y la definicion (tuneo)
 #de lambda deben ser tomados en cuenta en el entrenamiento.
-#Ahora si hagamos la mediciÛn del poder predictivo
-#Hacemos la funciÛn para calcular el MSE en cada interacciÛn
+#Ahora si hagamos la medici√≥n del poder predictivo
+#Hacemos la funci√≥n para calcular el MSE en cada interacci√≥n
 mod8RHM=function(x, Plie, Dat){
   train <- which(Plie != x)
   test = (-train)
@@ -339,14 +339,14 @@ mod8RHM=function(x, Plie, Dat){
 
 MSE.5.mod8 = sapply(1:K,mod8RHM, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando 5-CV es
+#As√≠ el poder predictivo de este modelo usando 5-CV es
 (models[8,5]=mean(MSE.5.mod8))
 # 17.71160 OJO CUIDAOOOO ALGUNOS WARNING, Aunque creo no es mucho problema
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con liga identidad y distribuciÛn Gaussiana, realizando una selecciÛn de variables
-#usando mÈtodo lasso, sobre el modelo que considera efectos principales y
-#su versiÛn al cuadrado.
+#con liga identidad y distribuci√≥n Gaussiana, realizando una selecci√≥n de variables
+#usando m√©todo lasso, sobre el modelo que considera efectos principales y
+#su versi√≥n al cuadrado.
 #Agrupamos nuestros datos para usar glmnet
 Xmod9 = model.matrix(formexp, data = datos)[,-1]
 Ymod9 = datos[,"brozek"]
@@ -361,11 +361,11 @@ mod9.lasso.tun$lambda.min
 #Vemos cuales son las variables y los coeficientes resultantes al usar esta variable
 coef(mod9.lasso.tun, s = "lambda.min")
 #Recordemos que estos estimadores no son EMV
-#AsÌ la REGLA FINAL es aquella en donde se usa el lambda seleccionado, en este caso
-#el lambda mas pequeÒo.
-#Notemos que la agrupaciÛn de nuestros datos para usar glmnet y la definicion (tuneo)
+#As√≠ la REGLA FINAL es aquella en donde se usa el lambda seleccionado, en este caso
+#el lambda mas peque√±o.
+#Notemos que la agrupaci√≥n de nuestros datos para usar glmnet y la definicion (tuneo)
 #de lambda deben ser tomados en cuenta en el entrenamiento.
-#Ahora si hagamos la mediciÛn del poder predictivo.
+#Ahora si hagamos la medici√≥n del poder predictivo.
 mod9RHM=function(x, Plie, Dat, forme){
   train <- which(Plie != x)
   test = (-train)
@@ -380,7 +380,7 @@ mod9RHM=function(x, Plie, Dat, forme){
 
 MSE.5.mod9 = sapply(1:K,mod9RHM, Plie=Pliegues, Dat=datos, forme = formexp)
 
-#AsÌ el poder predictivo de este modelo usando 5-CV es
+#As√≠ el poder predictivo de este modelo usando 5-CV es
 (models[9,5]=mean(MSE.5.mod9))
 # 17.82026
 
@@ -388,7 +388,7 @@ MSE.5.mod9 = sapply(1:K,mod9RHM, Plie=Pliegues, Dat=datos, forme = formexp)
 #iv) Explore algun otro modelo lineal generalizado
 #_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelos 
-#con distribuciÛn Gaussiana y ligas inverse y log, y modelos con distribuciÛn Gamma
+#con distribuci√≥n Gaussiana y ligas inverse y log, y modelos con distribuci√≥n Gamma
 #con ligas identity, inverse, y log, sobre el modelo que solo considera efectos 
 #principales.
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -400,7 +400,7 @@ models[10:11,4] = ligas[2:3]
 models[12:14,3] = dist[2]
 models[12:14,4] = ligas[1:3]
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#NOTA: Unicamente se guardar· el poder predictivo, y en caso de encontrar una regla 
+#NOTA: Unicamente se guardar√° el poder predictivo, y en caso de encontrar una regla 
 #con un buen poder predictivo se especificara el modelo de manera explicita
 mod_5CV_gau = function(x, Plie, Dat, liga){
   train <- which(Plie != x)
@@ -429,7 +429,7 @@ for(i in 1:nl){
 }
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelos 
-#con distribuciÛn Gaussiana y ligas inverse y log, y modelos con distribuciÛn Gamma
+#con distribuci√≥n Gaussiana y ligas inverse y log, y modelos con distribuci√≥n Gamma
 #con ligas identity, inverse, y log, sobre el modelo que solo considera efectos 
 #principales con sus interacciones.
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -468,7 +468,7 @@ for(i in 1:nl){
 }
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelos 
-#con distribuciÛn Gaussiana y ligas inverse y log, y modelos con distribuciÛn Gamma
+#con distribuci√≥n Gaussiana y ligas inverse y log, y modelos con distribuci√≥n Gamma
 #con ligas identity, inverse, y log, sobre el modelo que considera efectos 
 #principales y la version al cuadrado de los mismos.
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -508,15 +508,15 @@ for(i in 1:nl){
 }
 
 #Como podemos observar al usar una distribucion gaussiana con ligas inverse y log
-#se obtiene una regla con un mal poder predictivo, en comparaciÛn a los modelos en
+#se obtiene una regla con un mal poder predictivo, en comparaci√≥n a los modelos en
 #donde se uso una distribucion gaussiana con liga identity. Lo mismo sucede al utilizar
-#una distribuciÛn Gamma con ligas inverse y log. Por lo que para las siguientes
-#exploraciones solo se va a considerar la distribuciÛn Gamma con liga identity.
+#una distribuci√≥n Gamma con ligas inverse y log. Por lo que para las siguientes
+#exploraciones solo se va a considerar la distribuci√≥n Gamma con liga identity.
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con distribuciÛn Gamma y liga identity, sobre los modelos que consideran efectos 
+#con distribuci√≥n Gamma y liga identity, sobre los modelos que consideran efectos 
 #principales, efectos principales e interacciones entre las mismas, efectos
-#principales y su versiÛn al cuadrada. Realizando a la vez seleccion de variables 
+#principales y su versi√≥n al cuadrada. Realizando a la vez seleccion de variables 
 #mediante el metodo stepwise con el criterio AIC.
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 #Guardamos los esquemas
@@ -571,9 +571,9 @@ MSE.5.mod.GV6 = sapply(1:K,mod_5CV_GammaV6, Plie=Pliegues, Dat=datos)
 models[27,5]=mean(MSE.5.mod.GV6)
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar un modelo 
-#con distribuciÛn Gamma y liga identity, sobre los modelos que consideran efectos 
+#con distribuci√≥n Gamma y liga identity, sobre los modelos que consideran efectos 
 #principales, efectos principales e interacciones entre las mismas, efectos
-#principales y su versiÛn al cuadrada. Realizando a la vez seleccion de variables 
+#principales y su versi√≥n al cuadrada. Realizando a la vez seleccion de variables 
 #mediante el lasso.
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 #Guardamos los esquemas
@@ -596,7 +596,7 @@ modRHMV7=function(x, Plie, Dat){
 }
 MSE.5.modV7= sapply(1:K,modRHMV7, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando MSE y 5-CV es
+#As√≠ el poder predictivo de este modelo usando MSE y 5-CV es
 models[28,5]=mean(MSE.5.modV7)
 
 #Para efectos principales con interacciones
@@ -613,7 +613,7 @@ modRHMV8=function(x, Plie, Dat){
 }
 MSE.5.modV8= sapply(1:K,modRHMV8, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando MSE y 5-CV es
+#As√≠ el poder predictivo de este modelo usando MSE y 5-CV es
 models[29,5]=mean(MSE.5.modV8) #Mucho warning
 
 #Para efectos principales con variables al cuadrado
@@ -630,13 +630,13 @@ modRHMV9=function(x, Plie, Dat){
 }
 MSE.5.modV9 = sapply(1:K,modRHMV9, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando MSE y 5-CV es
+#As√≠ el poder predictivo de este modelo usando MSE y 5-CV es
 models[30,5]=mean(MSE.5.modV9)
 
 #DESCRIPCION DEL METODO DE ENTRENAMIENTO Y REGLA FINAL. Vamos a considerar modelos 
-#con distribuciÛn Gamma con liga identity y con distribuciÛn gaussiana con liga identidad, 
+#con distribuci√≥n Gamma con liga identity y con distribuci√≥n gaussiana con liga identidad, 
 #sobre los modelos que consideran efectos  principales, efectos principales e interacciones 
-#entre las mismas, efectos principales y su versiÛn al cuadrada. Realizando a la vez 
+#entre las mismas, efectos principales y su versi√≥n al cuadrada. Realizando a la vez 
 #seleccion de variables mediante el metodo stepwise con el criterio BIC.
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 #Guardamos los esquemas
@@ -649,7 +649,7 @@ models[31:33,4] = ligas[1]
 models[34:36,4] = ligas[1]
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-#Modelos solo con efectos principales, con distribuciÛn gaussiana y liga identity
+#Modelos solo con efectos principales, con distribuci√≥n gaussiana y liga identity
 mod1BIC_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
   test = (-train)
@@ -663,10 +663,10 @@ mod1BIC_5CV = function(x, Plie, Dat){
 }
 MSE.5.mod1BIC= sapply(1:K,mod1BIC_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando MSE y 5-CV es
+#As√≠ el poder predictivo de este modelo usando MSE y 5-CV es
 models[31,5]=mean(MSE.5.mod1BIC)
 
-#Modelos con efectos principales e interacciones, con distribuciÛn gaussiana y 
+#Modelos con efectos principales e interacciones, con distribuci√≥n gaussiana y 
 #liga identity
 mod2BIC_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
@@ -681,11 +681,11 @@ mod2BIC_5CV = function(x, Plie, Dat){
 }
 MSE.5.mod2BIC= sapply(1:K,mod2BIC_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando MSE y 5-CV es
+#As√≠ el poder predictivo de este modelo usando MSE y 5-CV es
 models[32,5]=mean(MSE.5.mod2BIC)
 #19.4758
 
-#Modelos solo con efectos principales y variables al cuadrado, con distribuciÛn 
+#Modelos solo con efectos principales y variables al cuadrado, con distribuci√≥n 
 #gaussiana y liga identity
 mod3BIC_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
@@ -700,12 +700,12 @@ mod3BIC_5CV = function(x, Plie, Dat){
 }
 MSE.5.mod3BIC= sapply(1:K,mod3BIC_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando MSE y 5-CV es
+#As√≠ el poder predictivo de este modelo usando MSE y 5-CV es
 models[33,5]=mean(MSE.5.mod3BIC)
 
 #PARA CORREGIR ERROR SE PUEDE AGREGAR UNA CONSTANTE A LOS DATOS, PERO COMO EL 
 #OBJETIVO ES PREDICCION QUIZA NO SEA LO MAS OPTIMO
-#Modelos solo con efectos principales, con distribuciÛn Gamma y liga identity
+#Modelos solo con efectos principales, con distribuci√≥n Gamma y liga identity
 #mod4BIC_5CV = function(x, Plie, Dat){
 #  train <- which(Plie != x)
 #  test = (-train)
@@ -719,11 +719,11 @@ models[33,5]=mean(MSE.5.mod3BIC)
 #}
 #MSE.5.mod4BIC= sapply(1:K,mod4BIC_5CV, Plie=Pliegues, Dat=datos+2)
 
-#AsÌ el poder predictivo de este modelo usando MSE y 5-CV es
+#As√≠ el poder predictivo de este modelo usando MSE y 5-CV es
 #(models[34,5]=mean(MSE.5.mod4BIC))
 
 #TARDA UN POQUITO/MUCHO
-#Modelos con efectos principales e interacciones, con distribuciÛn Gamma y 
+#Modelos con efectos principales e interacciones, con distribuci√≥n Gamma y 
 #liga identity
 mod5BIC_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
@@ -738,11 +738,11 @@ mod5BIC_5CV = function(x, Plie, Dat){
 }
 MSE.5.mod5BIC= sapply(1:K,mod5BIC_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando MSE y 5-CV es
+#As√≠ el poder predictivo de este modelo usando MSE y 5-CV es
 models[35,5]=mean(MSE.5.mod5BIC)
 #19.4758
 
-#Modelos solo con efectos principales y variables al cuadrado, con distribuciÛn 
+#Modelos solo con efectos principales y variables al cuadrado, con distribuci√≥n 
 #Gamma y liga identity
 mod6BIC_5CV = function(x, Plie, Dat){
   train <- which(Plie != x)
@@ -757,11 +757,11 @@ mod6BIC_5CV = function(x, Plie, Dat){
 }
 MSE.5.mod6BIC= sapply(1:K,mod6BIC_5CV, Plie=Pliegues, Dat=datos)
 
-#AsÌ el poder predictivo de este modelo usando MSE y 5-CV es
+#As√≠ el poder predictivo de este modelo usando MSE y 5-CV es
 models[36,5]=mean(MSE.5.mod6BIC)
 #19.4758
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#Hagamos los modelos para la distribuciÛn Gamma y liga identidad
+#Hagamos los modelos para la distribuci√≥n Gamma y liga identidad
 #1
 modG1 = glm(brozek ~ ., family = Gamma("identity"), data = datos)
 summary(modG1)
