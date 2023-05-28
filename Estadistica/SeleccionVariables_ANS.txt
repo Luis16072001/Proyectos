@@ -1,0 +1,904 @@
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
+#---------------------------1. Selección de variables---------------------------
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
+#Importamos la base de datos fat del paquete faraway
+rm(list = ls(all.names = TRUE))
+gc()
+library(faraway)
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
+#-------------------------Preprocesamiento de los datos-------------------------
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
+
+#Consideramos únicamente las variables de interes
+datos = fat[,colnames(fat)[c(1,4:7,9:18)]]
+#Veamos las descripciones de cada variable:
+#brozek Porcentaje de grasa corporal utilizando la ecuación de Brozek, 457/Densidad - 414,2
+#age Edad (años)
+#weight Peso (libras)
+#height Altura (pulgadas)
+#adipos Índice de adiposidad = Peso/Altura$^2$ (kg/$m^2$)
+#neck Circunferencia del cuello (cm)
+#chest Circunferencia del pecho (cm)
+#abdom Circunferencia del abdomen (cm) en el ombligo y al nivel de la cresta ilíaca
+#hip Circunferencia de la cadera (cm)
+#thigh Circunferencia del muslo (cm)
+#knee Circunferencia de la rodilla (cm)
+#ankle Circunferencia del tobillo (cm)
+#biceps Circunferencia extendida del bíceps (cm)
+#forearm Circunferencia del antebrazo (cm)
+#wrist Circunferencia de la muñeca (cm) distal a la apófisis estiloides
+#Veamos la structura de nuestros datos
+str(datos)
+#Por la descripción de cada una de nuestras variables, sabemos que no es necesario
+#un preprocesamiento de nuestras variables ya que todas pueden ser consideradas como
+#variables continuas.
+#Ahora veamos un resumen de nuestros datos
+summary(datos)
+#De este resumen podemos conocer un poco acerca de las personas que formarón este estudio
+#* El estudio contiende datos de hombres desde los 22 años hasta los 81 años,
+#  la edad promedio es de 45 años.
+#* El peso promedio es de 178.9 lbs, sin embargo, se tiene un registro de un peso de
+#  363.1 lbs, por lo que mas adelante sera descartado.
+#* La altura promedio es de 70.15 pulgadas, sin embargo, se tiene un resgistro de una
+#  altura de 29.5 pulgadas, por lo que mas adelante sera descartado.
+#* Podemos observar que se tiene un valor de la variable brozek que es cero, por lo que
+#  mas adelante sera descartado.
+#Eliminamos los registros anteriormente indicados
+datos = datos[datos$brozek != 0,]
+datos = datos[datos$weight != 363.1,]
+datos = datos[datos$height != 29.50,]
+
+#+-+-+-+-+-++-+-+-+-+-++-+-+-+-+-++-+-+-+-+-++-+-+-+-+-++-+-+-+-+-++-+-+-+-+-+-+
+#Agregamosla versión al cuadrado de los datos para el inciso iii)
+#+-+-+-+-+-++-+-+-+-+-++-+-+-+-+-++-+-+-+-+-++-+-+-+-+-++-+-+-+-+-++-+-+-+-+-+-+
+datosIII = datos
+datosIII$"age^2" = datos$age^2
+datosIII$"weight^2" = datos$weight^2
+datosIII$"height^2" = datos$height^2
+datosIII$"adipos^2" = datos$adipos^2
+datosIII$"neck^2" = datos$neck^2
+datosIII$"chest^2" = datos$chest^2
+datosIII$"abdom^2" = datos$abdom^2
+datosIII$"hip^2" = datos$hip^2
+datosIII$"thigh^2" = datos$thigh^2
+datosIII$"knee^2" = datos$knee^2
+datosIII$"ankle^2" = datos$ankle^2
+datosIII$"biceps^2" = datos$biceps^2
+datosIII$"forearm^2" = datos$forearm^2
+datosIII$"wrist^2" = datos$wrist^2
+
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
+#i) Considere un modelo para datos continuos con liga identidad y distribucion 
+#Gaussiana. Realice una selección de variables considerando solo los efectos 
+#principales de las variables y usando: a) mejor subconjunto, b) un método 
+#stepwise y c) método lasso. En cada caso, presente el mejor modelo obtenido
+#usando el criterio BIC.
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
+
+#Primero aplicamos el método de mejor subconjunto
+#Usaremos el paquete bestglm, por lo que primer vamos a reordenar nuestros datos
+datosModxy = datos[,c(2:15,1)]
+library(bestglm)
+best.idnt = bestglm(datosModxy,
+                    IC = "BIC",
+                    method = "exhaustive")
+#Veamos cual es el mejor modelo obtenido mediante este método
+best.idnt$BestModel
+#Veamos cual es su BIC
+BIC(best.idnt$BestModel)
+
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
+#Ahora hacemos con un metodo stepwise, en particular un backward
+#Ajustamos el modelo
+fat.glm <- glm(brozek ~ ., data = datos)
+library(MASS)
+fat.step <- stepAIC(fat.glm, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step$formula
+#Veamos cual es su BIC
+BIC(fat.step)
+
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
+#Ahora hacemos con método lasso
+#Usamos la paqueteria glmnet
+library(glmnet)
+#Primero ponemos nuestros datos en el formato indicado
+#Creanis la matriz diseño
+Xfat <- model.matrix(brozek ~ ., data=datos)[,-1]
+#Creamos nuestra variable Y
+Y <- datos[,"brozek"] 
+#Ajustamos el modelo
+fit.glmnet <- glmnet(Xfat, Y, family = gaussian, nlambda = 200, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit=-((fit.glmnet$relaxed$nulldev)-fit.glmnet$relaxed$nulldev * (1 - fit.glmnet$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet$relaxed$df
+MinBICfit=which.min(BICfit)
+coef(fit.glmnet$relaxed)[,MinBICfit]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV <- glm(brozek ~.-knee, data = datos)
+#Calculamos su BIC
+BIC(fit.glmnetSV)
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
+#ii) Considere un modelo para datos continuos con liga identidad y distribucion 
+#Gaussiana. Realice una seleccion de variables considerando en el modelo los 
+#efectos principales de las variables, asi como su interacción, sólo considerando: 
+#a) un método stepwise y b) método lasso. En cada caso, presente el mejor modelo 
+#obtenido usando el criterio BIC.
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
+#Probamos un metodo stepwise, en particular un backward con interacciones
+#Primero ajustamos el glm
+fat.glm2 <- glm(brozek ~ .^2, data = datos)
+#Option 1
+fat.step2 <- stepAIC(fat.glm2, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step2$formula
+#Veamos cual es el BIC de este modelo
+BIC(fat.step2)
+
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*
+#Ahora hacemos con método lasso con interaciones
+#Primero ponemos nuestros datos en el formato indicado
+Xfat2 <- model.matrix(brozek ~ .^2, data=datos)[,-1]
+Y <- datos[,"brozek"] 
+#Ajustamos
+fit.glmnet2 <- glmnet(Xfat2, Y, nlambda = 500, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit2=-((fit.glmnet2$relaxed$nulldev)-fit.glmnet2$relaxed$nulldev * (1 - fit.glmnet2$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet2$relaxed$df
+MinBICfit2=which.min(BICfit2)
+coef(fit.glmnet2$relaxed)[,MinBICfit2]
+
+#Obtenemos la formula de este modelo
+#Guardamos los coeficientes
+a = coef(fit.glmnet2$relaxed)[,MinBICfit2]
+#Valores distintos de cero
+b=c()
+#Nombres de las variables del modelo
+r=c()
+#Nombres de las variables de modelo distintas de cero
+q=c()
+for (i in 1:length(a)){
+  if (a[i] != 0 ) {b[i] = a[i]}
+}  
+for (i in 1:length(a)){
+  r[i] = names(a[i])
+} 
+names(b) = r
+b = b[!is.na(b)]
+for (i in 2:length(b)){
+  q[i] = names(b[i])
+} 
+q[1] = "brozek ~"
+#Creamos la formula
+formi = paste(q[2:length(q)],collapse = "+")
+formc = paste(q[1],formi)
+length(q)
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV2 <- glm(formula = formc, data = datos)
+summary(fit.glmnetSV2)
+#Calculamos su BIC
+BIC(fit.glmnetSV2)
+
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
+#iii) Considere posibles modificaciones a los incisos i) y ii) realizando lo siguiente. 
+#A) usar distribución Gamma (ligas identity y log); B) usar en los modelos de forma 
+#adicional la versión al cuadrado de las variables. En cada caso, presente el mejor 
+#modelo obtenido usando el criterio BIC.
+#_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
+################################################################################
+#Primero hagamos las respectivas modificaciones al inciso i)
+################################################################################
+#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+#Primero aplicamos el método de mejor subconjunto
+#Consideremos la distribución Gamma con liga identity
+best.idnt3A1 = bestglm(datosModxy+2,
+                    IC = "BIC",
+                    family = Gamma("identity"),
+                    method = "exhaustive")
+#Veamos cual es el mejor modelo obtenido mediante este método
+best.idnt3A1$BestModel
+#Veamos cual es su BIC
+BIC(best.idnt3A1$BestModel)
+
+#Consideremos la distribución Gamma con liga log
+best.idnt3A2 = bestglm(datosModxy,
+                       IC = "BIC",
+                       family = Gamma("log"),
+                       method = "exhaustive")
+#Veamos cual es el mejor modelo obtenido mediante este método
+best.idnt3A2$BestModel
+#Veamos cual es su BIC
+BIC(best.idnt3A2$BestModel)
+
+#Modificamos los datos para considerar el cuadrado de las variables
+datosModxy3 = datos[,2:15]^2
+datosModxy3$brozek = datos[,1]
+
+#Consideremos la distribución Gaussiana con liga identity
+best.idnt3A3 = bestglm(datosModxy3,
+                       IC = "BIC",
+                       method = "exhaustive")
+#Veamos cual es el mejor modelo obtenido mediante este método
+best.idnt3A3$BestModel
+#Veamos cual es su BIC
+BIC(best.idnt3A3$BestModel)
+
+#Consideremos la distribución Gamma con liga identity
+best.idnt3A4 = bestglm(datosModxy3+1,
+                       IC = "BIC",
+                       family = Gamma("identity"),
+                       method = "exhaustive")
+#Veamos cual es el mejor modelo obtenido mediante este método
+best.idnt3A4$BestModel
+#Veamos cual es su BIC
+BIC(best.idnt3A4$BestModel)
+
+#Consideremos la distribución Gamma con liga log
+best.idnt3A5 = bestglm(datosModxy3,
+                       IC = "BIC",
+                       family = Gamma("log"),
+                       method = "exhaustive")
+#Veamos cual es el mejor modelo obtenido mediante este método
+best.idnt3A5$BestModel
+#Veamos cual es su BIC
+BIC(best.idnt3A5$BestModel)
+#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+#Ahora hacemos con un metodo stepwise, en particular un backward
+
+#Consideremos la distribución Gamma con liga identity
+#Ajustamos el modelo
+fat.glm3A6 <- glm(brozek ~ ., family = Gamma(link="identity"), data = datos)
+fat.step3A6 <- stepAIC(fat.glm3A6, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A6$formula
+#Veamos cual es su BIC
+BIC(fat.step3A6)
+
+#Consideremos la distribución Gamma con liga log
+#Ajustamos el modelo
+fat.glm3A7 <- glm(brozek ~ ., family = Gamma(link="log"), data = datos)
+fat.step3A7 <- stepAIC(fat.glm3A7, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A7$formula
+#Veamos cual es su BIC
+BIC(fat.step3A7)
+
+#Modificamos los datos para considerar el cuadrado de las variables
+datosMod = datos^2
+datosMod[,1] = datosMod[,1]^(1/2)
+
+#Consideremos la distribución Gamma con liga identity
+#Ajustamos el modelo
+fat.glm3A8 <- glm(brozek ~ ., data = datosMod)
+fat.step3A8 <- stepAIC(fat.glm3A8, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A8$formula
+#Veamos cual es su BIC
+BIC(fat.step3A8)
+
+#Consideremos la distribución Gamma con liga identity
+#Ajustamos el modelo
+fat.glm3A9 <- glm(brozek ~ ., family = Gamma(link="identity"), data = datosMod)
+fat.step3A9 <- stepAIC(fat.glm3A9, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A9$formula
+#Veamos cual es su BIC
+BIC(fat.step3A9)
+
+#Consideremos la distribución Gamma con liga log
+#Ajustamos el modelo
+fat.glm3A10 <- glm(brozek ~ ., family = Gamma(link="log"), data = datosMod)
+fat.step3A10 <- stepAIC(fat.glm3A10, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A10$formula
+#Veamos cual es su BIC
+BIC(fat.step3A10)
+
+#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+#Ahora hacemos con método lasso
+
+#Consideremos la distribucion Gamma con liga identity
+#Ajustamos el modelo
+fit.glmnet3A11 <- glmnet(Xfat, Y, family = Gamma(link="identity"), nlambda = 200, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A11=-((fit.glmnet3A11$relaxed$nulldev)-fit.glmnet3A11$relaxed$nulldev * (1 - fit.glmnet3A11$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A11$relaxed$df
+MinBICfit3A11=which.min(BICfit3A11)
+coef(fit.glmnet3A11$relaxed)[,MinBICfit3A11]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A11 <- glm(brozek ~ abdom, data = datos)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A11)
+
+#Consideremos la distribucion Gamma con liga log
+#Ajustamos el modelo
+fit.glmnet3A12 <- glmnet(Xfat, Y, family = Gamma(link="log"), nlambda = 200, relax = TRUE)
+print(fit.glmnet3A12)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A12=-((fit.glmnet3A12$relaxed$nulldev)-fit.glmnet3A12$relaxed$nulldev * (1 - fit.glmnet3A12$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A12$relaxed$df
+MinBICfit3A12=which.min(BICfit3A12)
+coef(fit.glmnet3A12$relaxed)[,MinBICfit3A12]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A12 <- glm(brozek ~ abdom, family = Gamma(link="log"),data = datos)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A12)
+
+#Modificamos los datos para consideras el cuadrado de las variables
+Xfat3A <- model.matrix(brozek ~ ., data=datos)[,-1]
+Xfat3A = Xfat3A^2
+
+#Consideremos la distribucion Gamma y liga identity
+#Ajustamos el modelo
+fit.glmnet3A13 <- glmnet(Xfat3A, Y, family = gaussian, nlambda = 200, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A13=-((fit.glmnet3A13$relaxed$nulldev)-fit.glmnet3A13$relaxed$nulldev * (1 - fit.glmnet3A13$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A13$relaxed$df
+MinBICfit3A13=which.min(BICfit3A13)
+coef(fit.glmnet3A13$relaxed)[,MinBICfit3A13]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A13 <- glm(brozek ~., data = datos)#Modificar
+#Calculamos su BIC
+BIC(fit.glmnetSV3A13)
+
+#Consideremos la distribucion Gamma con liga identity
+#Ajustamos el modelo
+fit.glmnet3A14 <- glmnet(Xfat3A, Y, family = Gamma(link="identity"), nlambda = 200, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A14=-((fit.glmnet3A14$relaxed$nulldev)-fit.glmnet3A14$relaxed$nulldev * (1 - fit.glmnet3A14$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A14$relaxed$df
+MinBICfit3A14=which.min(BICfit3A14)
+coef(fit.glmnet3A14$relaxed)[,MinBICfit3A14]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A14 <- glm(brozek ~ abdom, family = Gamma(link="identity"), data = datos)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A14)
+
+#Consideremos la distribucion Gamma con liga log
+#Ajustamos el modelo
+fit.glmnet3A15 <- glmnet(Xfat3A, Y, family = Gamma(link="log"), nlambda = 200, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A15=-((fit.glmnet3A15$relaxed$nulldev)-fit.glmnet3A15$relaxed$nulldev * (1 - fit.glmnet3A15$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A15$relaxed$df
+MinBICfit3A15=which.min(BICfit3A15)
+coef(fit.glmnet3A15$relaxed)[,MinBICfit3A15]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A15 <- glm(brozek ~ abdom, family = Gamma(link="log"), data = datos)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A15)
+#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+################################################################################
+#Ahora hagamos las respectivas modificaciones al inciso ii)
+################################################################################
+#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+#Usamos un metodo stepwise, en particular un backward sin intercciones
+
+#Usando la liga indentity con interacciones
+fat.glm3A16 <- glm(brozek ~ .^2, family = Gamma(link="identity"), data = datos)
+fat.step3A16 <- stepAIC(fat.glm3A16, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A16$formula
+#Veamos cual es su BIC
+BIC(fat.step3A16)
+
+#Usando la liga log con interacciones
+fat.glm3A17 <- glm(brozek ~ .^2, family = Gamma(link="log"), data = datos)
+fat.step3A17 <- stepAIC(fat.glm3A17, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A17$formula
+#Veamos cual es su BIC
+BIC(fat.step3A17)
+
+#Usando la liga indentity con interacciones
+fat.glm3A18 <- glm(brozek ~ .^2, data = datosMod)
+fat.step3A18 <- stepAIC(fat.glm3A18, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A18$formula
+#Veamos cual es su BIC
+BIC(fat.step3A18)
+
+#Usando la liga indentity con interacciones
+fat.glm3A19 <- glm(brozek ~ .^2, family = Gamma(link="identity"), data = datosMod)
+fat.step3A19 <- stepAIC(fat.glm3A19, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A19$formula
+#Veamos cual es su BIC
+BIC(fat.step3A19)
+
+#Usando la liga log con interacciones
+fat.glm3A20 <- glm(brozek ~ .^2, family = Gamma(link="log"), data = datosMod)
+fat.step3A20 <- stepAIC(fat.glm3A20, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A20$formula
+#Veamos cual es su BIC
+BIC(fat.step3A20)
+
+#
+#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+#Ahora usamos metodo Lasso
+
+#Creamos la matriz diseño para el caso donde hay interacciones
+Xfat3Int <- model.matrix(brozek ~ .^2, data=datos)[,-1]
+Y3 <- datos[,"brozek"]
+
+#Ajustamos el modelo con distribución gamma y función liga "identity" con interacciones
+fit.glmnet3A21 <- glmnet(Xfat3Int, Y3, family = Gamma(link="identity"), nlambda = 2000, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A21=-((fit.glmnet3A21$relaxed$nulldev)-fit.glmnet3A21$relaxed$nulldev * (1 - fit.glmnet3A21$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A21$relaxed$df
+MinBICfit3A21=which.min(BICfit3A21)
+coef(fit.glmnet3A21$relaxed)[,MinBICfit3A21]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A21 <- glm(brozek ~abdom, family = Gamma(link="identity"), data = datos)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A21)
+
+#Ajustamos el modelo con distribución gamma y función liga "log" con interacciones
+fit.glmnet3A22 <- glmnet(Xfat3Int, Y3, family = Gamma(link="log"), nlambda = 2000, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A22=-((fit.glmnet3A22$relaxed$nulldev)-fit.glmnet3A22$relaxed$nulldev * (1 - fit.glmnet3A22$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A22$relaxed$df
+MinBICfit3A22=which.min(BICfit3A22)
+coef(fit.glmnet3A22$relaxed)[,MinBICfit3A22]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A22 <- glm(brozek ~abdom, family = Gamma(link="log"), data = datos)#Modificar
+#Calculamos su BIC
+BIC(fit.glmnetSV3A22)
+
+#Modificamos los datos para tener las variables al cuadrado
+Xfat3ModInt <- Xfat3Int^2
+
+#Ajustamos el modelo
+fit.glmnet3A23 <- glmnet(Xfat3ModInt, Y3, family = gaussian, nlambda = 2000, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A23=-((fit.glmnet3A23$relaxed$nulldev)-fit.glmnet3A23$relaxed$nulldev * (1 - fit.glmnet3A23$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A23$relaxed$df
+MinBICfit3A23=which.min(BICfit3A23)
+coef(fit.glmnet3A23$relaxed)[,MinBICfit3A23]
+#Aqui
+
+#Obtenemos la formula de este modelo
+#Guardamos los coeficientes
+a = coef(fit.glmnet3A23$relaxed)[,MinBICfit3A23]
+#Valores distintos de cero
+b=c()
+#Nombres de las variables del modelo
+r=c()
+#Nombres de las variables de modelo distintas de cero
+q=c()
+for (i in 1:length(a)){
+  if (a[i] != 0 ) {b[i] = a[i]}else{b[i] = NA}
+}  
+for (i in 1:length(a)){
+  r[i] = names(a[i])
+} 
+names(b) = r
+b = b[!is.na(b)]
+for (i in 2:length(b)){
+  q[i] = names(b[i])
+} 
+q[1] = "brozek ~"
+#Creamos la formula
+formi3A23 = paste(q[2:length(q)],collapse = "+")
+formc3A23 = paste(q[1],formi)
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A23 <- glm(formula = formc3A23, data = datos)#Modificar
+#Calculamos su BIC
+BIC(fit.glmnetSV3A23)
+
+#Ajustamos el modelo con distribución gamma y función liga "identity" con interacciones
+fit.glmnet3A24 <- glmnet(Xfat3ModInt, Y3, family = Gamma(link="identity"), nlambda = 2000, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A24=-((fit.glmnet3A24$relaxed$nulldev)-fit.glmnet3A24$relaxed$nulldev * (1 - fit.glmnet3A24$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A24$relaxed$df
+MinBICfit3A24=which.min(BICfit3A24)
+coef(fit.glmnet3A24$relaxed)[,MinBICfit3A24]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A24 <- glm(brozek ~abdom, family = Gamma(link="identity"), data = datos)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A24)
+
+#Ajustamos el modelo con distribución gamma y función liga "log" con interacciones
+fit.glmnet3A25 <- glmnet(Xfat3ModInt, Y3, family = Gamma(link="log"), nlambda = 500, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A25=-((fit.glmnet3A25$relaxed$nulldev)-fit.glmnet3A25$relaxed$nulldev * (1 - fit.glmnet3A25$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A25$relaxed$df
+MinBICfit3A25=which.min(BICfit3A25)
+coef(fit.glmnet3A25$relaxed)[,MinBICfit3A25]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A25 <- glm(brozek ~abdom, family = Gamma(link="log"), data = datos)#Modificar
+#Calculamos su BIC
+BIC(fit.glmnetSV3A25)
+
+################################################################################
+#################################NOTA IMPORTANTE################################
+#Debido a un error en como entendimos el inciso iii) de este ejercicio en lugar de
+#adicionar los valores de las variables al cuadrado, se consideró el cuadrado de las
+#variables. Dado que ese trabajo ya esta hecho no queremos borrarlo, sin embargo, 
+#no serán incluidos en el reporte, solo quedarán aquí en el codigo como modelos extra.
+#Aadicionalmente vamos a hacer los modelos tal y como se pide en el ejercicio y 
+#dichos modelos si serán incluidos en el reporte
+################################################################################
+################################################################################
+
+#Hagamos las modifiaciones para el inciso i)
+
+#Usando mejor subconjunto
+#Modificamos los datos para considerar el cuadrado de las variables
+datosModxy3III = datosIII[,c(2:29,1)]
+#Consideremos la distribución Gaussiana con liga identity
+best.idnt3A26 = bestglm(datosModxy3III,
+                       IC = "BIC",
+                       method = "exhaustive")
+#Veamos cual es el mejor modelo obtenido mediante este método
+best.idnt3A26$BestModel
+#Veamos cual es su BIC
+BIC(best.idnt3A26$BestModel)
+
+#Para los modelos con distribución Gamma con ligas identity y log ocurre un error
+#por lo que no serán considerados
+
+#Usando metodo stepwise (Backward)
+
+#Consideremos la distribución Gaussiana con liga identity
+#Ajustamos el modelo
+fat.glm3A27 <- glm(brozek ~ ., data = datosIII)
+fat.step3A27 <- stepAIC(fat.glm3A27, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A27$formula
+#Veamos cual es su BIC
+BIC(fat.step3A27)
+
+#Consideremos la distribución Gamma con liga identity
+#Ajustamos el modelo
+fat.glm3A28 <- glm(brozek ~ ., family = Gamma(link="identity"), data = datosIII)
+fat.step3A28 <- stepAIC(fat.glm3A28, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A28$formula
+#Veamos cual es su BIC
+BIC(fat.step3A28)
+
+#Consideremos la distribución Gamma con liga log
+#Ajustamos el modelo
+fat.glm3A29 <- glm(brozek ~ ., family = Gamma(link="log"), data = datosIII)
+fat.step3A29 <- stepAIC(fat.glm3A29, trace = FALSE, k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A29$formula
+#Veamos cual es su BIC
+BIC(fat.step3A29)
+
+#Usando metodo Lasso
+
+#Modificamos los datos para consideras el cuadrado de las variables
+Xfat3AIII <- model.matrix(brozek ~ ., data=datosIII)[,-1]
+
+#Consideremos la distribucion Gamma y liga identity
+#Ajustamos el modelo con una distribución Gaussiana y liga identity
+fit.glmnet3A30 <- glmnet(Xfat3AIII, Y, family = gaussian, nlambda = 2000, relax = TRUE)
+print(fit.glmnet3A30)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A30=-((fit.glmnet3A30$relaxed$nulldev)-fit.glmnet3A30$relaxed$nulldev * (1 - fit.glmnet3A30$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A30$relaxed$df
+MinBICfit3A30=which.min(BICfit3A30)
+coef(fit.glmnet3A30$relaxed)[,MinBICfit3A30]
+
+#Obtenemos la formula de este modelo
+#Guardamos los coeficientes
+a = coef(fit.glmnet3A30$relaxed)[,MinBICfit3A30]
+#Valores distintos de cero
+b=c()
+#Nombres de las variables del modelo
+r=c()
+#Nombres de las variables de modelo distintas de cero
+q=c()
+for (i in 1:length(a)){
+  if (a[i] != 0 ) {b[i] = a[i]}else{b[i] = NA}
+}  
+for (i in 1:length(a)){
+  r[i] = names(a[i])
+} 
+names(b) = r
+b = b[!is.na(b)]
+for (i in 2:length(b)){
+  q[i] = names(b[i])
+} 
+q[1] = "brozek ~"
+#Creamos la formula
+formi3A30 = paste(q[2:length(q)],collapse = "+")
+formc3A30 = paste(q[1],formi3A30)
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A30 <- glm(formula = formc3A30, data = datosIII)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A30)
+
+#Consideremos la distribucion Gamma con liga identity
+#Ajustamos el modelo
+fit.glmnet3A31 <- glmnet(Xfat3AIII, Y, family = Gamma(link="identity"), nlambda = 2000, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A31=-((fit.glmnet3A31$relaxed$nulldev)-fit.glmnet3A31$relaxed$nulldev * (1 - fit.glmnet3A31$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A31$relaxed$df
+MinBICfit3A31=which.min(BICfit3A31)
+coef(fit.glmnet3A31$relaxed)[,MinBICfit3A31]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A31 <- glm(brozek ~ abdom, family = Gamma(link="identity"), data = datosIII)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A31)
+
+#Consideremos la distribucion Gamma con liga log
+#Ajustamos el modelo
+fit.glmnet3A32 <- glmnet(Xfat3AIII, Y, family = Gamma(link="log"), nlambda = 2000, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A32=-((fit.glmnet3A32$relaxed$nulldev)-fit.glmnet3A32$relaxed$nulldev * (1 - fit.glmnet3A32$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A32$relaxed$df
+MinBICfit3A32=which.min(BICfit3A32)
+coef(fit.glmnet3A32$relaxed)[,MinBICfit3A32]
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A32 <- glm(brozek ~ abdom, family = Gamma(link="log"), data = datosIII)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A32)
+
+#Para el metodo Stepwise (Backward) con interacciones, no resulta optimo adicionar
+#los valores al cuadrado de las variables, ya que en total se tendrian 28 variables
+# y al hacer las interacciones, se tendrian 406 variables que estarian incluidas
+#en el modelo más complejo, si bien computacionalmente es posible esto podria 
+#demorar mucho tiempo, por lo que no se van a realizar.
+#Sin embargo, podemos cambiar la forma en que se recorre el metodo, y en lugar de
+#hacerlo backward, lo hacemos forward.
+
+#Ajustamos el modelo para una distribución Gaussiana con liga identidad
+fat.glm3A36 <- glm(brozek ~., data = datosIII)
+fat.step3A36 <- stepAIC(fat.glm3A36, scope =list(upper = ~ .^2, lower = ~1), trace = FALSE,direction ="forward", k=log(dim(datos)[1]))
+#Veamos cual es el mejor modelo obtenido mediante este metodo
+fat.step3A36$formula
+#Veamos cual es su BIC
+BIC(fat.step3A36)
+
+
+#Consideremos la distribución Gamma con liga identity
+#Ajustamos el modelo
+fat.glm3A37 <- glm(brozek ~., family = Gamma(link="identity"), data = datosIII)
+fat.step3A37 <- stepAIC(fat.glm3A37, scope =list(upper = ~ .^2, lower = ~1), trace = FALSE,direction ="forward", k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A37$formula
+#Veamos cual es su BIC
+BIC(fat.step3A37)
+
+#Consideremos la distribución Gamma con liga log
+#Ajustamos el modelo
+fat.glm3A38 <- glm(brozek ~., family = Gamma(link="log"), data = datosIII)
+fat.step3A38 <- stepAIC(fat.glm3A38, scope =list(upper = ~ .^2, lower = ~1), trace = FALSE,direction ="forward", k=log(dim(datos)[1])) 
+#Veamos cual es el mejor modelo obtenido mediante este método
+fat.step3A38$formula
+#Veamos cual es su BIC
+BIC(fat.step3A38)
+
+
+#Ahora usemos método Lasso con interacciones
+#Primero creamos la matriz con nuestros datos
+Xfat3IntIII <- model.matrix(brozek ~ .^2, data=datosIII)[,-1]
+
+#Consideremos distribución Gaussiana y liga identidad
+#Ajustamos el modelo
+fit.glmnet3A33 <- glmnet(Xfat3IntIII, Y3, family = gaussian, nlambda = 10000, relax = TRUE)
+print()
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A33=-((fit.glmnet3A33$relaxed$nulldev)-fit.glmnet3A33$relaxed$nulldev * (1 - fit.glmnet3A33$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A33$relaxed$df
+MinBICfit3A33=which.min(BICfit3A33)
+coef(fit.glmnet3A33$relaxed)[,MinBICfit3A33]
+
+#Obtenemos la formula de este modelo
+#Guardamos los coeficientes
+a = coef(fit.glmnet3A33$relaxed)[,MinBICfit3A33]
+#Valores distintos de cero
+b=c()
+#Nombres de las variables del modelo
+r=c()
+#Nombres de las variables de modelo distintas de cero
+q=c()
+for (i in 1:length(a)){
+  if (a[i] != 0 ) {b[i] = a[i]}else{b[i] = NA}
+}  
+for (i in 1:length(a)){
+  r[i] = names(a[i])
+} 
+names(b) = r
+b = b[!is.na(b)]
+for (i in 2:length(b)){
+  q[i] = names(b[i])
+} 
+q[1] = "brozek ~"
+#Creamos la formula
+formi3A33 = paste(q[2:length(q)],collapse = " + ")
+formc3A33 = paste(q[1],formi3A33)
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A33 <- glm(formula = formc3A33, data = datosIII)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A33)
+
+#Consideremos distribución Gamma y liga identidad
+#Ajustamos el modelo
+fit.glmnet3A34 <- glmnet(Xfat3IntIII, Y3, family = Gamma(link="identity"), nlambda = 10000, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A34=-((fit.glmnet3A34$relaxed$nulldev)-fit.glmnet3A34$relaxed$nulldev * (1 - fit.glmnet3A34$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A34$relaxed$df
+MinBICfit3A34=which.min(BICfit3A34)
+coef(fit.glmnet3A34$relaxed)[,MinBICfit3A34]
+
+#Obtenemos la formula de este modelo
+#Guardamos los coeficientes
+a = coef(fit.glmnet3A34$relaxed)[,MinBICfit3A34]
+#Valores distintos de cero
+b=c()
+#Nombres de las variables del modelo
+r=c()
+#Nombres de las variables de modelo distintas de cero
+q=c()
+for (i in 1:length(a)){
+  if (a[i] != 0 ) {b[i] = a[i]}else{b[i] = NA}
+}  
+for (i in 1:length(a)){
+  r[i] = names(a[i])
+} 
+names(b) = r
+b = b[!is.na(b)]
+for (i in 2:length(b)){
+  q[i] = names(b[i])
+} 
+q[1] = "brozek ~"
+#Creamos la formula
+formi3A34 = paste(q[2:length(q)],collapse = " + ")
+formc3A34 = paste(q[1],formi3A34)
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A34 <- glm(formula = formc3A34, data = datosIII)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A34)
+
+#Consideremos distribución Gamma y liga log
+#Ajustamos el modelo
+fit.glmnet3A35 <- glmnet(Xfat3IntIII, Y3, family = Gamma(link="log"), nlambda = 10000, relax = TRUE)
+# Vemos cual es el mejor modelo obtenido con este método
+BICfit3A35=-((fit.glmnet3A35$relaxed$nulldev)-fit.glmnet3A35$relaxed$nulldev * (1 - fit.glmnet3A35$relaxed$dev.ratio))+log(dim(datos)[1])*fit.glmnet3A35$relaxed$df
+MinBICfit3A35=which.min(BICfit3A35)
+coef(fit.glmnet3A35$relaxed)[,MinBICfit3A35]
+
+#Obtenemos la formula de este modelo
+#Guardamos los coeficientes
+a = coef(fit.glmnet3A35$relaxed)[,MinBICfit3A35]
+#Valores distintos de cero
+b=c()
+#Nombres de las variables del modelo
+r=c()
+#Nombres de las variables de modelo distintas de cero
+q=c()
+for (i in 1:length(a)){
+  if (a[i] != 0 ) {b[i] = a[i]}else{b[i] = NA}
+}  
+for (i in 1:length(a)){
+  r[i] = names(a[i])
+} 
+names(b) = r
+b = b[!is.na(b)]
+for (i in 2:length(b)){
+  q[i] = names(b[i])
+} 
+q[1] = "brozek ~"
+#Creamos la formula
+formi3A35 = paste(q[2:length(q)],collapse = " + ")
+formc3A35 = paste(q[1],formi3A35)
+
+#Ajustamos el glm con las variables resultantes
+fit.glmnetSV3A35 <- glm(formula = formc3A35, data = datosIII)
+#Calculamos su BIC
+BIC(fit.glmnetSV3A35)
+
+################################################################################
+###############Verificación de supuestos de los 5 mejores modelos###############
+################################################################################
+library(car)
+library(broom)
+library(lawstat)
+#brozek ~ abdom + weight^2 + wrist^2
+fat.BM1 <- lm(brozek ~ abdom + I(weight^2) + I(wrist^2), data = datos)
+#HOMOCEDASTICIDAD
+car::ncvTest(fat.BM1)
+#p > 0.05, no hay evidencia en contra de la Homocedasticidad
+#LINEALIDAD
+residualPlots(fat.BM1)
+# todos los p-value son mayores a 0.05, por lo que no hay evidencia en contra de 
+# la Linealidad
+#NORMALIDAD
+Datosfat.BM1 = augment(fat.BM1)
+shapiro.test(Datosfat.BM1$.std.resid)
+#p-value > 0.05 por lo que no hay evidencia en contra de la normalidad de los datos
+#ALEATORIEDAD
+lawstat::runs.test(Datosfat.BM1$.std.resid, plot.it = TRUE)
+#p-value > 0.05, no hay evidencia en contra de la aleatoriedad de los datos
+#Por lo tanto este modelo cumple todos los supuestos
+
+
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+#brozek ~ age + height + abdom + hip + wrist + age:wrist + abdom:hip
+fat.BM2 <- lm(brozek ~ age + height + abdom + hip + wrist + age:wrist + abdom:hip, data = datos)
+#HOMOCEDASTICIDAD
+car::ncvTest(fat.BM2)
+#p > 0.05, no hay evidencia en contra de la Homocedasticidad
+#LINEALIDAD
+residualPlots(fat.BM2)
+# todos los p-value son mayores a 0.05, por lo que no hay evidencia en contra de 
+# la Linealidad
+#NORMALIDAD
+Datosfat.BM2 = augment(fat.BM2)
+shapiro.test(Datosfat.BM2$.std.resid)
+#p-value > 0.05 por lo que no hay evidencia en contra de la normalidad de los datos
+#ALEATORIEDAD
+lawstat::runs.test(Datosfat.BM2$.std.resid, plot.it = TRUE)
+#p-value > 0.05, no hay evidencia en contra de la aleatoriedad de los datos
+#Por lo tanto este modelo cumple todos los supuestos
+
+
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+#brozek ~ abdom + hip + wrist + adipos^2 + chest^2 + hip^2
+fat.BM3 <- lm(brozek ~ abdom + hip + wrist + I(adipos^2) + I(chest^2) + I(hip^2), data = datos)
+#HOMOCEDASTICIDAD
+car::ncvTest(fat.BM3)
+#p > 0.05, no hay evidencia en contra de la Homocedasticidad
+#LINEALIDAD
+residualPlots(fat.BM3)
+# todos los p-value son mayores a 0.05, por lo que no hay evidencia en contra de 
+# la Linealidad
+#NORMALIDAD
+Datosfat.BM3 = augment(fat.BM3)
+shapiro.test(Datosfat.BM3$.std.resid)
+#p-value > 0.05 por lo que no hay evidencia en contra de la normalidad de los datos
+#ALEATORIEDAD
+lawstat::runs.test(Datosfat.BM3$.std.resid, plot.it = TRUE)
+#p-value > 0.05, no hay evidencia en contra de la aleatoriedad de los datos
+#Por lo tanto este modelo cumple todos los supuestos
+
+
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+#brozek ~ weight + abdom + forearm + wrist
+fat.BM4 <- lm(brozek ~ weight + abdom + forearm + wrist, data = datos)
+#HOMOCEDASTICIDAD
+car::ncvTest(fat.BM4)
+#p > 0.05, no hay evidencia en contra de la Homocedasticidad
+#LINEALIDAD
+residualPlots(fat.BM4)
+#Podemos notar que los p-value asociados a las las variables weight y abdom con 
+#menores al 0.05, por que podemos considerar plausible que este modelo tiene
+#ciertos problemas con la linealidad
+#NORMALIDAD
+Datosfat.BM4 = augment(fat.BM4)
+shapiro.test(Datosfat.BM4$.std.resid)
+#p-value > 0.05 por lo que no hay evidencia en contra de la normalidad de los datos
+#ALEATORIEDAD
+lawstat::runs.test(Datosfat.BM4$.std.resid, plot.it = TRUE)
+#p-value > 0.05, no hay evidencia en contra de la aleatoriedad de los datos
+#Por lo tanto este modelo no cumple todos los supuestos, pues tiene problemas
+#con la linealidad, por o que alguna transformación a nuestras covariables podría
+#ser una opción.
+
+
+#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_
+#brozek ~ abdom + age:biceps^2 + age:forearm^2 + abdom:forearm + age^2:ankle^2 + 
+#weight^2:adipos^2 + height^2:neck^2 + height^2:wrist^2 + neck^2:wrist^2
+
+fat.BM5 <- lm(brozek ~ abdom + age:I(biceps^2) + age:I(forearm^2) + abdom:forearm + 
+                I(age^2):I(ankle^2) + I(weight^2):I(adipos^2) + I(height^2):I(neck^2) + 
+                I(height^2):I(wrist^2) + I(neck^2):I(wrist^2), data = datos)
+#HOMOCEDASTICIDAD
+car::ncvTest(fat.BM5)
+#p > 0.05, no hay evidencia en contra de la Homocedasticidad
+#LINEALIDAD
+residualPlots(fat.BM5)
+# todos los p-value son mayores a 0.05, por lo que no hay evidencia en contra de 
+# la Linealidad
+#NORMALIDAD
+Datosfat.BM5 = augment(fat.BM5)
+shapiro.test(Datosfat.BM5$.std.resid)
+#p-value > 0.05 por lo que no hay evidencia en contra de la normalidad de los datos
+#ALEATORIEDAD
+lawstat::runs.test(Datosfat.BM5$.std.resid, plot.it = TRUE)
+#p-value > 0.05, no hay evidencia en contra de la aleatoriedad de los datos
+#Por lo tanto este modelo cumple todos los supuestos
