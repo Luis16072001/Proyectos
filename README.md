@@ -27,8 +27,8 @@ creación del modelo predictivo. Además, se incluyen comentarios explicando cad
 
 ## Proyectos en Visual Basic
 ### Autores: 
-- Luis Alberto Cruz Barrios
 - Montserrat Fernández Neria
+- Luis Alberto Cruz Barrios
 ### Valuación de derivados a tiempo discreto mediante Árboles Multiplicativos
 
 En este proyecto se desarrolló una macro en VBA para valuar diferentes tipos de derivados mediante Árboles Multiplicativos. La macro también permite generar 
