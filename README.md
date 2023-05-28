@@ -3,6 +3,8 @@ Este repositorio contiene algunos de los proyectos más importantes que he reali
 en R:
 
 ## Proyectos en R
+### Autor: 
+- Luis Alberto Cruz Barrios
 ### Selección de variables mediante aprendizaje no supervisado
 En este proyecto se utilizó un algoritmo de aprendizaje no supervisado para la selección de variables, con el objetivo de identificar las variables más 
 importantes en un modelo estadístico. El proyecto incluye un reporte detallado de los resultados obtenidos y el código implementado para llegar a ellos.
@@ -24,6 +26,9 @@ En la sección de código, se puede encontrar el código completo utilizado para
 creación del modelo predictivo. Además, se incluyen comentarios explicando cada paso del proceso.
 
 ## Proyectos en Visual Basic
+### Autores: 
+- Luis Alberto Cruz Barrios
+- Montserrat Fernández Neria
 ### Valuación de derivados a tiempo discreto mediante Árboles Multiplicativos
 
 En este proyecto se desarrolló una macro en VBA para valuar diferentes tipos de derivados mediante Árboles Multiplicativos. La macro también permite generar 
